@@ -12,15 +12,16 @@ def get_all_movies():
            (GROUP_CONCAT(DISTINCT ?genreName; separator="|") AS ?genres)
     WHERE {
         ?movie a :Movie ;
-               :title ?title ;
-               :overview ?overview .
+               :title ?title .
+
+        OPTIONAL {
+            ?movie :overview ?overview .
+        }
 
         OPTIONAL {
             ?movie :genres ?genre .
             ?genre :name ?genreName .
         }
-
-        FILTER(STRLEN(STR(?overview)) > 0)
     }
     GROUP BY ?movie ?title ?overview
     """
@@ -40,7 +41,7 @@ def get_all_movies():
         movies.append({
             "uri": row["movie"]["value"],
             "title": row["title"]["value"],
-            "overview": row["overview"]["value"],
+            "overview": row.get("overview", {}).get("value", ""),
             "genres": genres_text.split("|") if genres_text else []
         })
 
