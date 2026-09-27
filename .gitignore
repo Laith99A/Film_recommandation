@@ -1,0 +1,10 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# RDF data files (too big for GitHub, loaded into Fuseki instead)
+*.ttl
+*.nt
+*.rdf
