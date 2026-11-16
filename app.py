@@ -57,6 +57,7 @@ def load_movie_data():
 @app.route("/")
 def index():
     selected_movie = None
+    overview = ""
     genres = []
     similar_movies = []
     suggestions = []
@@ -83,6 +84,7 @@ def index():
                 movie = movies[movie_index]
                 selected_movie = movie["title"]
                 genres = movie["genres"]
+                overview = movie["overview"]
 
                 similar_movies = find_similar_movies(
                     selected_index=movie_index,
@@ -100,6 +102,7 @@ def index():
     return render_template(
         "index.html",
         selected_movie=selected_movie,
+        overview=overview,
         genres=genres,
         similar_movies=similar_movies,
         suggestions=suggestions,

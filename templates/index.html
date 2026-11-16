@@ -52,15 +52,21 @@
                     autocomplete="off"
                     placeholder="Enter movie title..."
                     value="{{ searched_title }}"
+                    {% if not searched_title %}autofocus{% endif %}
                 >
 
                 <button
                     type="submit"
                     class="btn btn-primary"
+                    id="search-button"
                 >
                     Find movies
                 </button>
 
+            </div>
+
+            <div class="form-text">
+                Start typing to see matching titles.
             </div>
 
             <datalist id="movie-titles">
@@ -125,29 +131,67 @@
                     {% endif %}
                 </p>
 
+                {% if overview %}
+                    <p class="overview mb-0">
+                        {{ overview }}
+                    </p>
+                {% endif %}
+
             </div>
 
             <div class="recommendations mt-4">
 
-                <h2>Similar Movies</h2>
+                <h2>
+                    Similar Movies
+
+                    {% if similar_movies %}
+                        <span class="badge text-bg-secondary">
+                            {{ similar_movies | length }}
+                        </span>
+                    {% endif %}
+                </h2>
 
                 {% if similar_movies %}
+
+                    <p class="text-muted small mb-0">
+                        Most similar first. Click a movie to see
+                        what is similar to it.
+                    </p>
+
+                    {# Only the first movies are visible, the rest
+                       appears after a click on "Show all". #}
+                    {% set visible_movies = 10 %}
 
                     <div class="list-group mt-3">
 
                         {% for movie in similar_movies %}
 
-                            <div class="list-group-item">
+                            <a
+                                href="{{ url_for('index', title=movie) }}"
+                                class="list-group-item list-group-item-action{% if loop.index > visible_movies %} more-movie d-none{% endif %}"
+                            >
                                 <span class="movie-number">
                                     {{ loop.index }}.
                                 </span>
 
                                 {{ movie }}
-                            </div>
+                            </a>
 
                         {% endfor %}
 
                     </div>
+
+                    {% if similar_movies | length > visible_movies %}
+
+                        <button
+                            type="button"
+                            class="btn btn-outline-secondary btn-sm mt-3"
+                            id="show-all-button"
+                        >
+                            Show all {{ similar_movies | length }} movies
+                        </button>
+
+                    {% endif %}
 
                 {% else %}
 
@@ -163,6 +207,38 @@
     </div>
 
 </div>
+
+<script>
+    // Show that the search is running. The first search can take a
+    // moment, because the movies are loaded from Fuseki.
+    const searchForm = document.querySelector("form");
+    const searchButton = document.getElementById("search-button");
+
+    searchForm.addEventListener("submit", function () {
+        searchButton.disabled = true;
+        searchButton.innerHTML =
+            '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> Searching...';
+    });
+
+    // Reset the button when the user comes back with the "back" button
+    window.addEventListener("pageshow", function () {
+        searchButton.disabled = false;
+        searchButton.textContent = "Find movies";
+    });
+
+    // "Show all" button below the first similar movies
+    const showAllButton = document.getElementById("show-all-button");
+
+    if (showAllButton) {
+        showAllButton.addEventListener("click", function () {
+            document.querySelectorAll(".more-movie").forEach(function (item) {
+                item.classList.remove("d-none");
+            });
+
+            showAllButton.remove();
+        });
+    }
+</script>
 
 </body>
 </html>
